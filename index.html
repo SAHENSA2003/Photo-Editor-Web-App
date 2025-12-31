@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor Application</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Custom.css">
+</head>
+
+<body>
+    <main class="main">
+        <section>
+            <div class="left">
+                <div class="Upside">
+                    <label class="btn btn0" for="choose">choose Image</label>
+                    <input id="choose" type="file" accept="image/*" hidden>
+                    <button id="Reset-btn" class="btn btn1">Reset</button>
+                    <button id="Download-btn" class="btn btn2">Download</button>
+                    <button id="cut" class="btn btn3">
+                        <svg height='20px' width='20px' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z">
+                            </path>
+                        </svg>
+                        <span>Edit</span>
+                    </button>
+                </div>
+                <div class="bottom">
+                    <div class="ImagePlaceHolder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M2.9918 21C2.44405 21 2 20.5551 2 20.0066V3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44495 22 3.9934V20.0066C22 20.5552 21.5447 21 21.0082 21H2.9918ZM20 15V5H4V19L14 9L20 15ZM20 17.8284L14 11.8284L6.82843 19H20V17.8284ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z">
+                            </path>
+                        </svg>
+                        <p>No Image</p>
+                    </div>
+                    <canvas id="canvas">
+
+                    </canvas>
+                </div>
+            </div>
+            <div class="right">
+                <div>
+                    <h1 class="hfilter">Filters</h1>
+                    <div class="filters">
+                    </div>
+                </div>
+                <div>
+                    <h2 class="hpreset">presets</h2>
+                    <div class="presets">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="sallu.js"></script>
+</body>
+
+</html>
