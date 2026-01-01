@@ -466,6 +466,11 @@ for (const Preset in presets) {
     PresetContainer.appendChild(presetButton);
 
     presetButton.addEventListener('click', () => {
+         if (chooseInput.value === '') {
+            alert('Choose an Image first!!!');
+            return;
+        }
+        
         const _preset = presets[Preset];
         console.log(_preset);
         for (const keys in _preset) {
