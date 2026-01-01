@@ -39,7 +39,7 @@ let filters = {
         value: 0,
         min: 0,
         max: 100,
-        uint: "%"
+        unit: "%"
     },
     Opacity: {
         value: 100,
@@ -68,8 +68,15 @@ const PresetContainer = document.querySelector('.presets');
 
 let image = null;
 let file = null;
-let PhotoName=null;
+let PhotoFileName = null;
+let FilterTimer = null;
 
+function applyFilterOptimize() {
+    clearTimeout(FilterTimer);
+    FilterTimer = setTimeout(() => {
+        applyFilter();
+    }, 20);
+}
 
 function CreateFilter(name, uint = '%', value, max, min) {
     const div = document.createElement('div')
@@ -82,9 +89,9 @@ function CreateFilter(name, uint = '%', value, max, min) {
     InputElement.max = max;
     InputElement.min = min;
 
-    InputElement.addEventListener('input', (E) => {
+    InputElement.addEventListener('input', () => {
         filters[name].value = InputElement.value;
-        applyFilter();
+        applyFilterOptimize();
     })
 
     let p = document.createElement('p');
@@ -110,20 +117,91 @@ chooseInput.addEventListener('change', (e) => {
     document.querySelector('.ImagePlaceHolder').style.display = 'none';
     document.querySelector('#canvas').style.display = 'block';
     file = (e.target.files[0]);
-    PhotoName=(e.target.files[0].name);
+    PhotoFileName = (e.target.files[0].name);
     let img = new Image();
-    img.src = URL.createObjectURL(file);
+    let ObjectURL = URL.createObjectURL(file)
+    img.src = ObjectURL;
+
 
     img.onload = () => {
         image = img;
-        _Canvas.width = img.width;
-        _Canvas.height = img.height;
-        CanvasCtx.drawImage(img, 0, 0,);
+        const MaxEditWidth = 1200;
+        let Ratio = img.height / img.width;
+
+        if (img.width > MaxEditWidth) {
+            _Canvas.width = MaxEditWidth;
+            _Canvas.height = MaxEditWidth * Ratio;
+        } else {
+            _Canvas.width = img.width;
+            _Canvas.height = img.height;
+        }
+        CanvasCtx.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
+        URL.revokeObjectURL(ObjectURL);
     }
+
+      filters = {
+            Brightness: {
+                value: 100,
+                min: 0,
+                max: 200,
+                unit: '%'
+            },
+            Contrast: {
+                value: 100,
+                min: 0,
+                max: 200,
+                unit: '%'
+            },
+            saturation: {
+                value: 100,
+                min: 0,
+                max: 200,
+                unit: '%'
+            },
+            Hue_Rotate: {
+                value: 0,
+                min: 0,
+                max: 360,
+                unit: 'deg'
+            },
+            Blur: {
+                value: 0,
+                min: 0,
+                max: 20,
+                unit: 'px'
+            },
+            Grayscale: {
+                value: 0,
+                min: 0,
+                max: 100,
+                unit: '%'
+            },
+            sepia: {
+                value: 0,
+                min: 0,
+                max: 100,
+                unit: "%"
+            },
+            Opacity: {
+                value: 100,
+                min: 0,
+                max: 100,
+                unit: '%'
+            },
+            Invert: {
+                value: 0,
+                min: 0,
+                max: 100,
+                unit: '%'
+            }
+        }
+        document.querySelector('.filters').innerHTML = '';
+        MakingFilter();
 
 })
 
 function applyFilter() {
+    CanvasCtx.save();
     CanvasCtx.clearRect(0, 0, _Canvas.width, _Canvas.height);
     CanvasCtx.filter = `
     brightness(${filters.Brightness.value}${filters.Brightness.unit})
@@ -134,12 +212,14 @@ function applyFilter() {
     grayscale(${filters.Grayscale.value}${filters.Grayscale.unit})
     invert(${filters.Invert.value}${filters.Invert.unit})
     opacity(${filters.Opacity.value}${filters.Opacity.unit})
+    sepia(${filters.sepia.value}${filters.sepia.unit})
     `
-    CanvasCtx.drawImage(image, 0, 0)
+    CanvasCtx.drawImage(image, 0, 0, _Canvas.width, _Canvas.height);
+    CanvasCtx.restore();
 }
 
 ResetButton.addEventListener('click', () => {
-     if(chooseInput.value ===''){
+    if (chooseInput.value === '') {
         alert('Choose an Image first!!!');
         return;
     }
@@ -184,7 +264,7 @@ ResetButton.addEventListener('click', () => {
             value: 0,
             min: 0,
             max: 100,
-            uint: "%"
+            unit: "%"
         },
         Opacity: {
             value: 100,
@@ -203,16 +283,58 @@ ResetButton.addEventListener('click', () => {
     document.querySelector('.filters').innerHTML = '';
     MakingFilter();
 })
+function PrepareCanvasForDownload(canvas, maxwidth = 1800) {
+    if (canvas.width <= maxwidth) return canvas;
 
+    let ratio = canvas.height / canvas.width;
+    let c = document.createElement('canvas');
+
+    c.width = maxwidth;
+    c.height = ratio * maxwidth;
+
+    c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+
+    return c;
+}
+
+function DownloadJPEGUnderLimit(canvas, fileName, maxSize = 2.5) {
+    const Max_Size = maxSize * 1024 * 1024;
+    let quality = 0.85;
+    const min_quality = 0.45;
+
+    function compress() {
+        canvas.toBlob((bold) => {
+            if (!bold) return
+
+            if (bold.size <= Max_Size || quality <= min_quality) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(bold);
+                link.download = fileName;
+                link.click();
+                return
+            }
+
+            quality -= 0.07;
+            compress();
+        }, "image/jpeg", quality);
+    }
+
+    compress();
+}
 DownloadButton.addEventListener('click', () => {
-     if(chooseInput.value ===''){
+    if (chooseInput.value === '') {
         alert('Choose an Image first!!!');
         return;
     }
-    const Download = document.createElement('a');
-    Download.download = 'EditedImage.png';
-    Download.href = _Canvas.toDataURL();
-    Download.click()
+
+
+    const exportCanvas = PrepareCanvasForDownload(_Canvas);
+
+    const outputName = PhotoFileName
+        ? PhotoFileName.replace(/\.\w+$/, '.jpg')
+        : 'EditedImage.jpg';
+
+    DownloadJPEGUnderLimit(exportCanvas, outputName, 2.5);
 })
 
 
@@ -360,17 +482,18 @@ function CloseEdit() {
     document.querySelector('#canvas').style.display = 'none';
     CanvasCtx.clearRect(0, 0, _Canvas.width, _Canvas.height);
     chooseInput.value = '';
+    CanvasCtx.filter = 'none';
     file = null;
     image = null;
-    PhotoName=null;
+    PhotoName = null;
 }
 
 document.querySelector('#cut').addEventListener('click', () => {
-    if(chooseInput.value ===''){
+    if (chooseInput.value === '') {
         alert('Choose an Image first!!!');
         return;
     }
-    let Confirm = confirm(`If you sure to close the edit of "${PhotoName}", then click on ok!! `);
+    let Confirm = confirm(`Are you sure to close the editing of [${PhotoFileName}] ! `);
     if (!Confirm) {
         return
     }
@@ -415,7 +538,7 @@ document.querySelector('#cut').addEventListener('click', () => {
             value: 0,
             min: 0,
             max: 100,
-            uint: "%"
+            unit: "%"
         },
         Opacity: {
             value: 100,
