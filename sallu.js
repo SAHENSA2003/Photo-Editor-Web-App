@@ -420,13 +420,13 @@ for (const Preset in presets) {
 
     presetButton.addEventListener('click', () => {
         if (!image || !isEditing) {
-            alert('choose an Image first!!')
-            return
+            alert('Choose an image first!');
+            return;
         }
+
         const _preset = presets[Preset];
-        console.log(_preset);
         for (const keys in _preset) {
-            filters[keys].value = _preset[keys]
+            filters[keys].value = _preset[keys];
         }
         applyFilter();
         Filters.innerHTML = '';
