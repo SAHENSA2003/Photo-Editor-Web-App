@@ -54,175 +54,7 @@ let filters = {
         unit: '%'
     }
 }
-
-
-const chooseInput = document.querySelector('#choose');
-const ResetButton = document.querySelector('#Reset-btn');
-const DownloadButton = document.querySelector('#Download-btn');
-const Filters = document.querySelector('.filters');
-const _Canvas = document.querySelector('#canvas');
-// const ImagePlaceholder=document.querySelector('')
-const CanvasCtx = _Canvas.getContext("2d");
-const PresetContainer = document.querySelector('.presets');
-
-
-let image = null;
-let file = null;
-let PhotoFileName = null;
-let FilterTimer = null;
-
-function applyFilterOptimize() {
-    clearTimeout(FilterTimer);
-    FilterTimer = setTimeout(() => {
-        applyFilter();
-    }, 20);
-}
-
-function CreateFilter(name, uint = '%', value, max, min) {
-    const div = document.createElement('div')
-    div.classList.add('filter');
-
-    let InputElement = document.createElement('input');
-    InputElement.type = 'range';
-    InputElement.name = name;
-    InputElement.value = value;
-    InputElement.max = max;
-    InputElement.min = min;
-
-    InputElement.addEventListener('input', () => {
-        filters[name].value = InputElement.value;
-        applyFilterOptimize();
-    })
-
-    let p = document.createElement('p');
-    p.innerText = name;
-    div.append(p)
-    div.append(InputElement)
-
-
-    return div;
-}
-// Making Filters with the help of the filters Object
-function MakingFilter() {
-    for (const filter in filters) {
-
-        let AFilter = CreateFilter(filter, '%', filters[filter].value, filters[filter].max, filters[filter].min);
-        Filters.appendChild(AFilter);
-    }
-}
-MakingFilter();
-
-// Choosing Image
-chooseInput.addEventListener('change', (e) => {
-    document.querySelector('.ImagePlaceHolder').style.display = 'none';
-    document.querySelector('#canvas').style.display = 'block';
-    file = (e.target.files[0]);
-    PhotoFileName = (e.target.files[0].name);
-    let img = new Image();
-    let ObjectURL = URL.createObjectURL(file)
-    img.src = ObjectURL;
-
-
-    img.onload = () => {
-        image = img;
-        const MaxEditWidth = 1200;
-        let Ratio = img.height / img.width;
-
-        if (img.width > MaxEditWidth) {
-            _Canvas.width = MaxEditWidth;
-            _Canvas.height = MaxEditWidth * Ratio;
-        } else {
-            _Canvas.width = img.width;
-            _Canvas.height = img.height;
-        }
-        CanvasCtx.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
-        URL.revokeObjectURL(ObjectURL);
-    }
-
-      filters = {
-            Brightness: {
-                value: 100,
-                min: 0,
-                max: 200,
-                unit: '%'
-            },
-            Contrast: {
-                value: 100,
-                min: 0,
-                max: 200,
-                unit: '%'
-            },
-            saturation: {
-                value: 100,
-                min: 0,
-                max: 200,
-                unit: '%'
-            },
-            Hue_Rotate: {
-                value: 0,
-                min: 0,
-                max: 360,
-                unit: 'deg'
-            },
-            Blur: {
-                value: 0,
-                min: 0,
-                max: 20,
-                unit: 'px'
-            },
-            Grayscale: {
-                value: 0,
-                min: 0,
-                max: 100,
-                unit: '%'
-            },
-            sepia: {
-                value: 0,
-                min: 0,
-                max: 100,
-                unit: "%"
-            },
-            Opacity: {
-                value: 100,
-                min: 0,
-                max: 100,
-                unit: '%'
-            },
-            Invert: {
-                value: 0,
-                min: 0,
-                max: 100,
-                unit: '%'
-            }
-        }
-        document.querySelector('.filters').innerHTML = '';
-        MakingFilter();
-
-})
-
-function applyFilter() {
-    CanvasCtx.save();
-    CanvasCtx.clearRect(0, 0, _Canvas.width, _Canvas.height);
-    CanvasCtx.filter = `
-    brightness(${filters.Brightness.value}${filters.Brightness.unit})
-    contrast(${filters.Contrast.value}${filters.Contrast.unit})
-    saturate(${filters.saturation.value}${filters.saturation.unit})
-    hue-rotate(${filters.Hue_Rotate.value}${filters.Hue_Rotate.unit})
-    blur(${filters.Blur.value}${filters.Blur.unit})
-    grayscale(${filters.Grayscale.value}${filters.Grayscale.unit})
-    invert(${filters.Invert.value}${filters.Invert.unit})
-    opacity(${filters.Opacity.value}${filters.Opacity.unit})
-    sepia(${filters.sepia.value}${filters.sepia.unit})
-    `
-    CanvasCtx.drawImage(image, 0, 0, _Canvas.width, _Canvas.height);
-    CanvasCtx.restore();
-}
-
-ResetButton.addEventListener('click', () => {
-    if (chooseInput.value === '') {
-        alert('Choose an Image first!!!');
-        return;
-    }
+function ResetFilter() {
     filters = {
         Brightness: {
             value: 100,
@@ -279,6 +111,127 @@ ResetButton.addEventListener('click', () => {
             unit: '%'
         }
     }
+}
+
+const chooseInput = document.querySelector('#choose');
+const ResetButton = document.querySelector('#Reset-btn');
+const DownloadButton = document.querySelector('#Download-btn');
+const Filters = document.querySelector('.filters');
+const _Canvas = document.querySelector('#canvas');
+// const ImagePlaceholder=document.querySelector('')
+const CanvasCtx = _Canvas.getContext("2d");
+const PresetContainer = document.querySelector('.presets');
+
+
+let image = null;
+let file = null;
+let PhotoFileName = null;
+let FilterTimer = null;
+let isEditing = false;
+
+function applyFilterOptimize() {
+    clearTimeout(FilterTimer);
+    FilterTimer = setTimeout(() => {
+        applyFilter();
+    }, 20);
+}
+
+function CreateFilter(name, uint = '%', value, max, min) {
+    const div = document.createElement('div')
+    div.classList.add('filter');
+
+    let InputElement = document.createElement('input');
+    InputElement.type = 'range';
+    InputElement.name = name;
+    InputElement.value = value;
+    InputElement.max = max;
+    InputElement.min = min;
+
+    InputElement.addEventListener('input', () => {
+        filters[name].value = InputElement.value;
+        applyFilterOptimize();
+    })
+
+    let p = document.createElement('p');
+    p.innerText = name;
+    div.append(p)
+    div.append(InputElement)
+
+
+    return div;
+}
+// Making Filters with the help of the filters Object
+function MakingFilter() {
+    for (const filter in filters) {
+
+        let AFilter = CreateFilter(filter, '%', filters[filter].value, filters[filter].max, filters[filter].min);
+        Filters.appendChild(AFilter);
+    }
+}
+MakingFilter();
+
+// Choosing Image
+chooseInput.addEventListener('change', (e) => {
+    if (!e.target.files || !e.target.files.length) {
+        return
+    }
+
+    file = e.target.files[0];
+    PhotoFileName = (e.target.files[0].name);
+    let img = new Image();
+    let ObjectURL = URL.createObjectURL(file)
+    img.src = ObjectURL;
+
+
+    img.onload = () => {
+        image = img;
+        isEditing = true;
+        document.querySelector('.ImagePlaceHolder').style.display = 'none';
+        document.querySelector('#canvas').style.display = 'block';
+        const MaxEditWidth = 1200;
+        let Ratio = img.height / img.width;
+
+        if (img.width > MaxEditWidth) {
+            _Canvas.width = MaxEditWidth;
+            _Canvas.height = MaxEditWidth * Ratio;
+        } else {
+            _Canvas.width = img.width;
+            _Canvas.height = img.height;
+        }
+        CanvasCtx.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
+        URL.revokeObjectURL(ObjectURL);
+    }
+
+    ResetFilter();
+    document.querySelector('.filters').innerHTML = '';
+    MakingFilter();
+
+})
+
+function applyFilter() {
+    CanvasCtx.save();
+    CanvasCtx.clearRect(0, 0, _Canvas.width, _Canvas.height);
+    CanvasCtx.filter = `
+    brightness(${filters.Brightness.value}${filters.Brightness.unit})
+    contrast(${filters.Contrast.value}${filters.Contrast.unit})
+    saturate(${filters.saturation.value}${filters.saturation.unit})
+    hue-rotate(${filters.Hue_Rotate.value}${filters.Hue_Rotate.unit})
+    blur(${filters.Blur.value}${filters.Blur.unit})
+    grayscale(${filters.Grayscale.value}${filters.Grayscale.unit})
+    invert(${filters.Invert.value}${filters.Invert.unit})
+    opacity(${filters.Opacity.value}${filters.Opacity.unit})
+    sepia(${filters.sepia.value}${filters.sepia.unit})
+    `
+    CanvasCtx.drawImage(image, 0, 0, _Canvas.width, _Canvas.height);
+    CanvasCtx.restore();
+}
+
+ResetButton.addEventListener('click', () => {
+    if (!image || !isEditing) {
+        alert('Choose an Image first!!!');
+        return;
+    }
+    ResetFilter();
     applyFilter();
     document.querySelector('.filters').innerHTML = '';
     MakingFilter();
@@ -322,7 +275,7 @@ function DownloadJPEGUnderLimit(canvas, fileName, maxSize = 2.5) {
     compress();
 }
 DownloadButton.addEventListener('click', () => {
-    if (chooseInput.value === '') {
+    if (!image || !isEditing) {
         alert('Choose an Image first!!!');
         return;
     }
@@ -466,6 +419,10 @@ for (const Preset in presets) {
     PresetContainer.appendChild(presetButton);
 
     presetButton.addEventListener('click', () => {
+        if (!image || !isEditing) {
+            alert('choose an Image first!!')
+            return
+        }
         const _preset = presets[Preset];
         console.log(_preset);
         for (const keys in _preset) {
@@ -489,70 +446,15 @@ function CloseEdit() {
 }
 
 document.querySelector('#cut').addEventListener('click', () => {
-    if (chooseInput.value === '') {
+    if (!image || !isEditing) {
         alert('Choose an Image first!!!');
         return;
     }
-    let Confirm = confirm(`Are you sure to close the editing of [${PhotoFileName}] ! `);
+    let Confirm = confirm(`If you sure to close the edit of "${PhotoFileName}", then click on ok!! `);
     if (!Confirm) {
         return
     }
-    filters = {
-        Brightness: {
-            value: 100,
-            min: 0,
-            max: 200,
-            unit: '%'
-        },
-        Contrast: {
-            value: 100,
-            min: 0,
-            max: 200,
-            unit: '%'
-        },
-        saturation: {
-            value: 100,
-            min: 0,
-            max: 200,
-            unit: '%'
-        },
-        Hue_Rotate: {
-            value: 0,
-            min: 0,
-            max: 360,
-            unit: 'deg'
-        },
-        Blur: {
-            value: 0,
-            min: 0,
-            max: 20,
-            unit: 'px'
-        },
-        Grayscale: {
-            value: 0,
-            min: 0,
-            max: 100,
-            unit: '%'
-        },
-        sepia: {
-            value: 0,
-            min: 0,
-            max: 100,
-            unit: "%"
-        },
-        Opacity: {
-            value: 100,
-            min: 0,
-            max: 100,
-            unit: '%'
-        },
-        Invert: {
-            value: 0,
-            min: 0,
-            max: 100,
-            unit: '%'
-        }
-    }
+    ResetFilter();
     CloseEdit();
     document.querySelector('.filters').innerHTML = '';
     MakingFilter();

@@ -157,9 +157,8 @@ main section .right .filters .filter input::-webkit-slider-runnable-track {
 }
 
 #canvas {
-    max-height: 90%;
-    max-width: 80vh;
-    background-color: rgb(71, 71, 214);
+    max-height: 70vh;
+    max-width: 70vw;
     display: none;
 }
 
@@ -181,6 +180,7 @@ main section .right .filters .filter input::-webkit-slider-runnable-track {
     main section .right {
         padding: 2px;
     }
+
     main section .right {
         display: flex;
         width: 100vw;
@@ -196,6 +196,11 @@ main section .right .filters .filter input::-webkit-slider-runnable-track {
         margin-top: var(--margin-sm);
     }
 
+    #canvas {
+        max-height: 90%;
+        max-width: 80vw;
+    }
+
     .presets {
         width: 20vw;
     }
@@ -205,6 +210,7 @@ main section .right .filters .filter input::-webkit-slider-runnable-track {
         text-align: center;
         font-size: 30px;
     }
+
     .bottom {
         height: 40vh;
         width: 100vw;
