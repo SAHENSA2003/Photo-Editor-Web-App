@@ -148,6 +148,9 @@ function CreateFilter(name, uint = '%', value, max, min) {
     InputElement.min = min;
 
     InputElement.addEventListener('input', () => {
+        if (!image || !isEditing) {
+            return;
+        }
         filters[name].value = InputElement.value;
         applyFilterOptimize();
     })
